@@ -1,43 +1,25 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../database/sequelize");
+// src/models/User.js
 
-const User = sequelize.define("User", {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-    },
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    countryCode: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    phone: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-    },
-    yearsOfExperience: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-    },
-    experienceLevel: {
-        type: DataTypes.ENUM("junior", "mid", "senior", "expert"),
-        allowNull: true,
-    },
-    address: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-    password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    }
-}, {
-    timestamps: true,
+// ✅ Correct: require Mongoose directly
+const mongoose = require("mongoose");
+
+// Define User schema using Mongoose
+const userSchema = new mongoose.Schema({
+    name: { type: String, required: true }, // User's name (required)
+    countryCode: { type: String, required: true }, // Country code (required)
+    phone: { type: String, required: true, unique: true }, // Unique phone number (required)
+    yearsOfExperience: { type: Number }, // Optional years of experience
+    experienceLevel: { 
+        type: String, 
+        enum: ["junior", "mid", "senior", "expert"] 
+    }, // Experience level (optional, must match one of the enum values)
+    address: { type: String }, // Optional address field
+    password: { type: String, required: true } // User password (required)
+}, { 
+    timestamps: true // Enables createdAt and updatedAt timestamps
 });
 
-module.exports = User;
+// Create User model from schema
+const User = mongoose.model("User", userSchema);
+
+module.exports = User; // Export model for use across the app

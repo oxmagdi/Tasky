@@ -3,10 +3,7 @@ require('dotenv').config("../../.env");
 
 module.exports = {
     db: {
-        host: process.env.DB_HOST || 'localhost',
-        user: process.env.DB_USER || 'root',
-        password: process.env.DB_PASSWORD || '',
-        database: process.env.DB_NAME || 'mydb',
+        uri: process.env.DB_URI || 'mongodb://localhost:27017/taskyDB',
     },
 
     port: process.env.APP_PORT || 3000,

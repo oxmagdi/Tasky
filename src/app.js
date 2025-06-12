@@ -1,16 +1,19 @@
-const express = require("express");
-const cors = require("cors");
-const path = require("path");
-const config = require("./config/config");
+const express = require("express"); // Import Express framework
+const cors = require("cors"); // Enable CORS for cross-origin requests
+const path = require("path"); // Handle file paths safely
+const config = require("./config/config"); // Import configuration settings
 
-const sequelize = require('./database/sequelize');
+const mongooseDB = require("./database/mongoose"); // Import MongoDB connection
 
 // Route files
-const authRoutes = require("./routes/authRoute");
-const userRoutes = require("./routes/userRoute");
-const taskRoutes = require("./routes/taskRoute");
+const authRoutes = require("./routes/authRoute"); // Authentication routes
+const userRoutes = require("./routes/userRoute"); // User-related routes
+const taskRoutes = require("./routes/taskRoute"); // Task-related routes
 
-const app = express();
+const app = express(); // Initialize Express app
+
+// ✅ Connect to MongoDB
+mongooseDB.connect();
 
 // ✅ Enable Cross-Origin Resource Sharing (CORS)
 app.use(cors());
@@ -18,11 +21,6 @@ app.use(cors());
 // ✅ Parse JSON and URL-encoded request bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// ✅ Test Database Connection
-sequelize.authenticate()
-    .then(() => console.log('Database connected successfully'))
-    .catch(err => console.error('Unable to connect to DB:', err));
 
 // ✅ Serve static files (image uploads) from configured directory
 app.use(`/${config.imageStorage.uploadDir}`, express.static(path.join(__dirname, "..", config.imageStorage.uploadDir)));

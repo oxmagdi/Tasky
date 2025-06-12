@@ -1,7 +1,9 @@
+// src/controolers/AuthCtrl.js
+
 const jwt = require("jsonwebtoken"); // Import JWT for token generation
 const Joi = require("joi"); // Import Joi for input validation
 const { hashPassword, verifyPassword } = require("../utils/passwordUtils"); // Import password utilities
-const User = require("../models/User"); // Import User model
+const User = require("../models/User"); // Import Mongoose User model
 const config = require("../config/config"); // Import configuration settings
 
 // Validation schema for user signup
@@ -35,10 +37,11 @@ const signupUser = async (req, res) => {
         if (error) return res.status(400).json({ error: error.details[0].message }); // Return validation error
 
         value.password = await hashPassword(value.password); // Hash password before storing
-        const user = await User.create(value); // Create user in the database
+        const user = new User(value); // Create user instance
+        await user.save(); // Save user to MongoDB
 
-        const accessToken = generateAccessToken(user.id); // Generate access token
-        const refreshToken = generateRefreshToken(user.id); // Generate refresh token
+        const accessToken = generateAccessToken(user._id); // Generate access token
+        const refreshToken = generateRefreshToken(user._id); // Generate refresh token
 
         refreshTokens.push(refreshToken); // Store refresh token temporarily
         res.status(201).json({ message: "Signup successful!", accessToken, refreshToken });
@@ -51,15 +54,15 @@ const signupUser = async (req, res) => {
 const loginUser = async (req, res) => {
     try {
         const { phone, password } = req.body; // Extract phone and password from request
-        const user = await User.findOne({ where: { phone } }); // Search for user by phone number
+        const user = await User.findOne({ phone }); // Search for user by phone number
 
         if (!user) return res.status(404).json({ message: "User not found" }); // If user not found, return error
 
         const validPassword = await verifyPassword(password, user.password); // Check if password matches
         if (!validPassword) return res.status(400).json({ message: "Invalid credentials" }); // Incorrect password
 
-        const accessToken = generateAccessToken(user.id); // Generate access token
-        const refreshToken = generateRefreshToken(user.id); // Generate refresh token
+        const accessToken = generateAccessToken(user._id); // Generate access token
+        const refreshToken = generateRefreshToken(user._id); // Generate refresh token
 
         refreshTokens.push(refreshToken); // Store refresh token temporarily
         res.json({ message: "Login successful", accessToken, refreshToken });

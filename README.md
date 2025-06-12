@@ -7,7 +7,7 @@ Tasky is a powerful **task management API** built with Node.js, Express, Sequeli
 - **User Authentication** (JWT-based login/signup)
 - **Task CRUD Operations** (Create, Read, Update, Delete)
 - **Image Uploads** (Using Multer)
-- **Secure Database Storage** (MySQL via Sequelize)
+- **Secure Database Storage** (MongooDB via mongoose)
 - **Postman Collection** for API Testing (`Tasky.postman_collection.json`)
 
 ## Installation & Setup
@@ -26,17 +26,18 @@ npm i
 ### Set Up Environment Variables
 Create a .env file based on .env.sample, and configure:
 ```bash
-    DB_USER=root
-    DB_PASSWORD=toor
-    DB_HOST=127.0.0.1
-    DB_PORT=3306
-    DB_NAME=tasky_v100_beta
+    # 🚀 Database Configuration
+    DB_URI=mongodb://localhost:27017/tasky_v100_beta
+
+    # 🌍 Application Configuration
     APP_PORT=3000
     IMAGE_UPLOAD_DIR=uploads
     IMAGE_BASE_URL=http://localhost:3000/uploads
-    JWT_SECRET=123456
+
+    # 🔐 JWT Configuration
+    JWT_SECRET=your_jwt_secret
     JWT_EXPIRES=15m
-    JWT_REFRESH_SECRET=654321
+    JWT_REFRESH_SECRET=your_jwt_refresh_secret
     JWT_REFRESH_EXPIRES=7d
 ```
 ### Start the Server

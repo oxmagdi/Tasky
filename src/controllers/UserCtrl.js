@@ -1,5 +1,7 @@
-const Joi = require("joi");
-const User = require("../models/User");
+// src/controolers/UserCtrl.js
+
+const Joi = require("joi"); // Import Joi for validation
+const User = require("../models/User"); // Import Mongoose User model
 const { hashPassword, verifyPassword } = require("../utils/passwordUtils"); // Import password utils
 
 // Validation schema for user input
@@ -13,9 +15,6 @@ const userSchema = Joi.object({
     password: Joi.string().min(8).required(), // Password must be at least 8 characters
 });
 
-// Secret key for JWT authentication
-const SECRET_KEY = "your_secret_key"; 
-
 // Create a new user with hashed password
 const createUser = async (req, res) => {
     try {
@@ -23,7 +22,8 @@ const createUser = async (req, res) => {
         if (error) return res.status(400).json({ error: error.details[0].message }); // Return validation error
 
         value.password = await hashPassword(value.password); // Hash password before saving
-        const user = await User.create(value); // Create user in the database
+        const user = new User(value); // Create user instance
+        await user.save(); // Save user to MongoDB
 
         res.status(201).json({ message: "User created successfully!", user }); // Respond with success
     } catch (error) {
@@ -34,11 +34,9 @@ const createUser = async (req, res) => {
 // Get user details by ID
 const getUserById = async (req, res) => {
     try {
-        const user = await User.findByPk(req.params.id, {
-            attributes: { exclude: ["password"] } // Explicitly exclude password field
-        });
+        const user = await User.findById(req.params.id).select("-password"); // Fetch user without password
         if (!user) return res.status(404).json({ message: "User not found" });
-        
+
         res.json(user);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -53,10 +51,10 @@ const updateUser = async (req, res) => {
 
         if (value.password) value.password = await hashPassword(value.password); // Hash password if updated
 
-        const user = await User.update(value, { where: { id: req.params.id } }); // Update user in DB
-        if (!user[0]) return res.status(404).json({ message: "User not found or not updated" }); // Handle update failure
+        const user = await User.findByIdAndUpdate(req.params.id, value, { new: true }); // Update user
+        if (!user) return res.status(404).json({ message: "User not found or not updated" }); // Handle update failure
 
-        res.json({ message: "User updated successfully!" }); // Respond with success
+        res.json({ message: "User updated successfully!", user });
     } catch (error) {
         res.status(500).json({ error: error.message }); // Handle errors
     }
@@ -65,9 +63,10 @@ const updateUser = async (req, res) => {
 // Delete a user
 const deleteUser = async (req, res) => {
     try {
-        const deleted = await User.destroy({ where: { id: req.params.id } }); // Delete user by ID
-        if (!deleted) return res.status(404).json({ message: "User not found" }); // Handle missing user
-        res.json({ message: "User deleted successfully!" }); // Respond with success
+        const deletedUser = await User.findOneAndDelete({ _id: userId }); // Delete user and their related tasks by ID
+        if (!deletedUser) return res.status(404).json({ message: "User not found" }); // Handle missing user
+
+        res.json({ message: "User deleted successfully!" });
     } catch (error) {
         res.status(500).json({ error: error.message }); // Handle errors
     }

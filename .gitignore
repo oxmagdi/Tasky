@@ -8,6 +8,12 @@ node_modules/
 logs/
 *.log
 
+# Ignore everything inside uploads/
+uploads/*
+
+# But allow the uploads/ directory itself
+!uploads/.gitkeep
+
 # Ignore build and cache files
 dist/
 .cache/

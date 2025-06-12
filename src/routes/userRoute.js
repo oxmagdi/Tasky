@@ -18,4 +18,7 @@ router.get("/users/:id", getUserById);
 // ✏️ Update a user by ID
 router.put("/users/:id", updateUser);
 
+// ❌ Delete a User (and its releated Tasks if exists)
+router.delete("/users/:id", deleteUser);
+
 module.exports = router;

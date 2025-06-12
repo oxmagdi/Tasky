@@ -1,48 +1,29 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../database/sequelize");
-const User = require("./User"); // Import User model
+// src/models/Task.js
 
-const Task = sequelize.define("Task", {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-    },
-    image: {
-        type: DataTypes.STRING, // Store image URL or path
-        allowNull: true,
-    },
-    title: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    description: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-    },
-    priority: {
-        type: DataTypes.ENUM("low", "medium", "high"),
-        defaultValue: "medium",
-    },
-    dueDate: {
-        type: DataTypes.DATE,
-        allowNull: true,
-    },
-    userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: User,
-            key: "id",
-        },
-        onDelete: "CASCADE",
-    }
-}, {
-    timestamps: true,
+// ✅ Correct: require Mongoose directly
+const mongoose = require("mongoose");
+
+// Define Task schema using Mongoose
+const taskSchema = new mongoose.Schema({
+    image: { type: String }, // Optional image URL or path
+    title: { type: String, required: true }, // Task title (required)
+    description: { type: String }, // Optional description field
+    priority: { 
+        type: String, 
+        enum: ["low", "medium", "high"], 
+        default: "medium"
+    }, // Priority with default value (required)
+    dueDate: { type: Date }, // Optional due date
+    userId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "User", // Reference User model
+        required: true 
+    } // Link task to a specific user
+}, { 
+    timestamps: true // Automatically adds createdAt and updatedAt fields
 });
 
-// Define the relationship (A user can have multiple tasks)
-User.hasMany(Task, { foreignKey: "userId" });
-Task.belongsTo(User, { foreignKey: "userId" });
+// Create Task model from schema
+const Task = mongoose.model("Task", taskSchema);
 
-module.exports = Task;
+module.exports = Task; // Export Task model for use across the app
